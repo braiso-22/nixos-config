@@ -86,6 +86,7 @@
   # Install firefox.
   programs.firefox.enable = true;
   programs.git.enable = true;
+  programs.claude-desktop.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -141,4 +142,6 @@
   system.stateVersion = "26.05"; # Did you read the comment?
   nix.settings.experimental-features = [ "nix-command" "flakes"];
   programs.nix-ld.enable = true;
+  services.spice-vdagentd.enable = true;
+  services.qemuGuest.enable = true;
 }
