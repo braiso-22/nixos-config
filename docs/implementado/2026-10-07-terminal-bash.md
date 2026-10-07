@@ -1,8 +1,8 @@
 # Fase 2: bash mejorada y herramientas de terminal
 
-- **Estado:** en curso (configurada y validada con dry-build, falta aplicar)
+- **Estado:** implementado
 - **Fecha:** 2026-10-07
-- **Commit / tag:** — / 0.4.0 (previsto)
+- **Commit / tag:** ver tag 0.4.0
 
 ## Contexto
 Tener una terminal productiva para desarrollo: prompt informativo, búsqueda
@@ -32,8 +32,16 @@ rápida en historial y archivos, navegación rápida entre carpetas, y la base
 ## Plan
 - [x] Configurar en `home.nix`
 - [x] `dry-build`: 153 MiB de descarga
-- [ ] Aplicar con `sudo nixos-rebuild switch` y abrir una terminal nueva
-- [ ] Comprobar prompt, iconos, Ctrl+R, `z`, `lg`
-- [ ] Commit + tag `0.4.0`, mover este archivo a `implementado/`
+- [x] Aplicar con `sudo nixos-rebuild switch` y abrir una terminal nueva
+- [x] Comprobar prompt, iconos, Ctrl+R, `z`, `lg`
+- [x] Commit + tag `0.4.0`, mover este archivo a `implementado/`
 
 ## Resultado
+Todo funciona en una bash nueva (las terminales ya abiertas siguen con la
+bash antigua hasta cerrarlas).
+
+- Descarga: 153 MiB, casi todo la fuente.
+- delta se configura por comando (`pager.diff`, `pager.log`, `pager.show`,
+  `pager.blame`) y no como `core.pager`: es normal que `core.pager` esté vacío.
+- Uso rápido: Ctrl+R historial, Ctrl+T archivos, Alt+C carpetas, `z <trozo>`,
+  `lg` (lazygit), `lt` (árbol), `tldr <comando>`, `rebuild` (aplicar la config).
