@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports =
@@ -47,9 +47,10 @@
   services.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
+  # Sin variante "nodeadkeys": así ´ + a = á (teclas muertas activadas)
   services.xserver.xkb = {
     layout = "es";
-    variant = "nodeadkeys";
+    variant = "";
   };
 
   # Configure console keymap
@@ -69,6 +70,18 @@
     # If you want to use JACK applications, uncomment this
     # jack.enable = true;
   };
+
+  # Ajustes por defecto de GNOME (dconf) para todos los usuarios
+  programs.dconf.profiles.user.databases = [{
+    settings = {
+      # Scroll natural (como en Mac). En la VM el trackpad llega como ratón,
+      # así que se activa en ambos.
+      "org/gnome/desktop/peripherals/mouse".natural-scroll = true;
+      "org/gnome/desktop/peripherals/touchpad".natural-scroll = true;
+      # Distribución de teclado de GNOME: español con teclas muertas
+      "org/gnome/desktop/input-sources".sources = [ (lib.gvariant.mkTuple [ "xkb" "es" ]) ];
+    };
+  }];
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
