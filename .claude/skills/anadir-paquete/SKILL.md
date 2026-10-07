@@ -7,6 +7,10 @@ description: Añade un programa o paquete a la configuración de NixOS de este r
 
 Recuerda: el usuario es principiante; explica en español cada paso en una frase.
 
+## 0. Documentar
+
+Antes de tocar nada, crea `docs/todo/<paquete>.md` (plantilla en `docs/README.md`; para un paquete basta con unas líneas: para qué lo quiere el usuario y dónde se añade). Al terminar, muévelo a `docs/implementado/` con la fecha delante, dentro del mismo commit.
+
 ## 1. Encontrar el nombre exacto
 
 El nombre que dice el usuario no siempre es el atributo de nixpkgs (p. ej. "vs code" → `vscode`, "obs" → `obs-studio`). Compruébalo siempre contra el nixpkgs **fijado en `flake.lock`**, no contra unstable:
@@ -26,8 +30,9 @@ La primera búsqueda evalúa todo nixpkgs: tarda varios minutos y usa mucha memo
 
 ## 2. Elegir dónde añadirlo
 
-- Si existe módulo (`nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'` da `true`), usa `programs.<nombre>.enable = true;` junto a `programs.git.enable` en `configuration.nix`. Los módulos configuran además lo que el programa necesita (servicios, permisos).
-- Si no, añádelo a `environment.systemPackages`. En `configuration.nix` ese bloque viene comentado de la instalación: la primera vez descoméntalo (quitando los ejemplos `vim`/`wget` si el usuario no los pidió) en lugar de crear un segundo bloque.
+- **Programas del usuario** (herramientas de terminal, editores, apps de escritorio): en `home.nix` (Home Manager). Si Home Manager tiene módulo (`nix eval .#nixosConfigurations.nixos.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'` da `true`), usa `programs.<nombre>.enable = true;` (configura también la integración con bash, git…). Si no, añádelo a `home.packages`.
+- **Cosas del sistema** (servicios, drivers, lo que necesite root o permisos especiales): en `configuration.nix`. Si existe módulo NixOS (`nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'` da `true`), usa `programs.<nombre>.enable = true;`; si no, `environment.systemPackages`.
+- Si dudas, pregunta al usuario explicando la diferencia en una frase.
 
 ## 3. Validar
 
@@ -45,4 +50,4 @@ Dale el comando (tú no puedes usar `sudo`):
 sudo nixos-rebuild switch --flake ~/nixos-config#nixos
 ```
 
-Cuando diga que ha terminado, lee su terminal para comprobar que acabó con `Done.` sin errores. Después propón un mensaje de commit en español (p. ej. `Añadir htop`) y **pregunta antes de hacer commit**.
+Cuando diga que ha terminado, lee su terminal para comprobar que acabó con `Done.` sin errores. Después mueve el doc a `docs/implementado/`, propón un mensaje de commit en español (p. ej. `Añadir htop`) y **pregunta antes de hacer commit**.
