@@ -2,13 +2,18 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -72,16 +77,23 @@
   };
 
   # Ajustes por defecto de GNOME (dconf) para todos los usuarios
-  programs.dconf.profiles.user.databases = [{
-    settings = {
-      # Scroll natural (como en Mac). En la VM el trackpad llega como ratón,
-      # así que se activa en ambos.
-      "org/gnome/desktop/peripherals/mouse".natural-scroll = true;
-      "org/gnome/desktop/peripherals/touchpad".natural-scroll = true;
-      # Distribución de teclado de GNOME: español con teclas muertas
-      "org/gnome/desktop/input-sources".sources = [ (lib.gvariant.mkTuple [ "xkb" "es" ]) ];
-    };
-  }];
+  programs.dconf.profiles.user.databases = [
+    {
+      settings = {
+        # Scroll natural (como en Mac). En la VM el trackpad llega como ratón,
+        # así que se activa en ambos.
+        "org/gnome/desktop/peripherals/mouse".natural-scroll = true;
+        "org/gnome/desktop/peripherals/touchpad".natural-scroll = true;
+        # Distribución de teclado de GNOME: español con teclas muertas
+        "org/gnome/desktop/input-sources".sources = [
+          (lib.gvariant.mkTuple [
+            "xkb"
+            "es"
+          ])
+        ];
+      };
+    }
+  ];
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
@@ -90,9 +102,12 @@
   users.users."brais" = {
     isNormalUser = true;
     description = "Brais";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+    ];
     packages = with pkgs; [
-    #  thunderbird
+      #  thunderbird
     ];
   };
 
@@ -151,7 +166,10 @@
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "26.05"; # Did you read the comment?
-  nix.settings.experimental-features = [ "nix-command" "flakes"];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   programs.nix-ld.enable = true;
   services.spice-vdagentd.enable = true;
   services.qemuGuest.enable = true;

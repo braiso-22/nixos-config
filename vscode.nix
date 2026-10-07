@@ -10,20 +10,25 @@
 # Kotlin no tiene perfil: se usa IntelliJ. Para extensiones que no estén en
 # nixpkgs, ver la tarea de IDEs en docs/ (flake nix-vscode-extensions).
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   nixpkgsExt = pkgs.vscode-extensions;
 
   extensionesComunes = [
-    nixpkgsExt.jnoortheen.nix-ide   # archivos .nix (como este repo)
-    nixpkgsExt.mkhl.direnv          # carga el entorno del devShell del proyecto
-    nixpkgsExt.eamodio.gitlens      # historial y autoría de git en el editor
+    nixpkgsExt.jnoortheen.nix-ide # archivos .nix (como este repo)
+    nixpkgsExt.mkhl.direnv # carga el entorno del devShell del proyecto
+    nixpkgsExt.eamodio.gitlens # historial y autoría de git en el editor
   ];
 
   ajustesComunes = {
     "editor.fontFamily" = "'JetBrainsMono Nerd Font', monospace";
-    "editor.fontLigatures" = true;  # => != === se ven como un símbolo
+    "editor.fontLigatures" = true; # => != === se ven como un símbolo
     "editor.fontSize" = 14;
     "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
     # Guardado automático tras 1 s sin escribir. Ese guardado no formatea:
@@ -43,10 +48,15 @@ let
   };
 
   # Crea un perfil con las extensiones y ajustes comunes más los suyos.
-  perfil = { extensiones ? [ ], ajustes ? { } }: {
-    extensions = extensionesComunes ++ extensiones;
-    userSettings = ajustesComunes // ajustes;
-  };
+  perfil =
+    {
+      extensiones ? [ ],
+      ajustes ? { },
+    }:
+    {
+      extensions = extensionesComunes ++ extensiones;
+      userSettings = ajustesComunes // ajustes;
+    };
 in
 {
   programs.vscode = {
@@ -54,7 +64,7 @@ in
     profiles = {
       # Para el repo de NixOS y cosas sueltas.
       default = perfil { } // {
-        enableUpdateCheck = false;          # VS Code lo actualiza Nix
+        enableUpdateCheck = false; # VS Code lo actualiza Nix
         enableExtensionUpdateCheck = false; # las extensiones también
       };
 

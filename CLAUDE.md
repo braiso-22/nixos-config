@@ -22,6 +22,7 @@ nix eval --raw .#nixosConfigurations.nixos.pkgs.<attr>.meta.description   # comp
 nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'   # ¿tiene módulo programs.<nombre>?
 nix eval .#nixosConfigurations.nixos.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'   # ¿tiene módulo programs.<nombre> en Home Manager?
 nix flake update nixpkgs                           # actualizar nixpkgs dentro de nixos-26.05 (cambia flake.lock)
+nixfmt <archivo>.nix                                # formatear (estilo oficial de Nix)
 ```
 
 `dry-build` imprime `these N paths will be fetched (X MiB download…)`: menciona ese tamaño al usuario antes de que aplique, le importa no descargar gigas.
@@ -33,6 +34,7 @@ nix flake update nixpkgs                           # actualizar nixpkgs dentro d
 - `configuration.nix`: lo del **sistema** (arranque, servicios, escritorio, usuarios).
 - `home.nix`: lo del **usuario** con Home Manager (herramientas de terminal, IDEs, dotfiles). Se aplica con el mismo `nixos-rebuild switch`. Las herramientas del usuario van aquí.
 - En ambos, si un programa tiene módulo `programs.<nombre>`, se prefiere a añadir el paquete suelto (`home.packages` o `environment.systemPackages`): el módulo configura también la integración (bash, git…).
+- Los `.nix` siguen el estilo de **nixfmt**: después de editar uno, pásale `nixfmt` (VS Code lo hace al guardar con Ctrl+S). Excepto `hardware-configuration.nix`.
 - `hardware-configuration.nix` lo genera `nixos-generate-config`: no lo edites.
 - `system.stateVersion = "26.05"` no se cambia nunca, ni al actualizar.
 

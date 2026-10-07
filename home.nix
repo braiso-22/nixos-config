@@ -2,11 +2,16 @@
 # sus dotfiles (~/.config/...). Se aplica con el mismo nixos-rebuild switch.
 # Opciones disponibles: https://home-manager-options.extranix.com/?release=release-26.05
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   imports = [
-    ./vscode.nix  # VS Code con perfiles por lenguaje
+    ./vscode.nix # VS Code con perfiles por lenguaje
   ];
 
   home.username = "brais";
@@ -48,16 +53,19 @@
   programs.bash = {
     enable = true;
     enableCompletion = true;
-    historySize = 10000;        # comandos en memoria
-    historyFileSize = 100000;   # comandos guardados en ~/.bash_history
+    historySize = 10000; # comandos en memoria
+    historyFileSize = 100000; # comandos guardados en ~/.bash_history
     # Sin duplicados; un comando que empieza por espacio no se guarda.
-    historyControl = [ "erasedups" "ignorespace" ];
+    historyControl = [
+      "erasedups"
+      "ignorespace"
+    ];
     shellOptions = [
-      "histappend"   # varias terminales abiertas no se pisan el historial
+      "histappend" # varias terminales abiertas no se pisan el historial
       "checkwinsize"
-      "globstar"     # ** busca en subcarpetas: ls **/*.nix
-      "autocd"       # escribir el nombre de una carpeta entra en ella
-      "cdspell"      # corrige erratas pequeñas en cd
+      "globstar" # ** busca en subcarpetas: ls **/*.nix
+      "autocd" # escribir el nombre de una carpeta entra en ella
+      "cdspell" # corrige erratas pequeñas en cd
     ];
     shellAliases = {
       ".." = "cd ..";
@@ -78,11 +86,11 @@
     git = true;
   };
 
-  programs.bat.enable = true;   # cat con resaltado de sintaxis: bat archivo
+  programs.bat.enable = true; # cat con resaltado de sintaxis: bat archivo
   programs.ripgrep.enable = true; # rg: grep mucho más rápido, respeta .gitignore
-  programs.fd.enable = true;    # fd: find más sencillo: fd nombre
-  programs.jq.enable = true;    # procesar JSON en la terminal
-  programs.btop.enable = true;  # monitor de CPU/memoria/procesos
+  programs.fd.enable = true; # fd: find más sencillo: fd nombre
+  programs.jq.enable = true; # procesar JSON en la terminal
+  programs.btop.enable = true; # monitor de CPU/memoria/procesos
 
   # Búsqueda difusa: Ctrl+R historial, Ctrl+T archivos, Alt+C carpetas.
   programs.fzf = {
@@ -110,7 +118,7 @@
     enable = true;
     enableGitIntegration = true;
     options = {
-      navigate = true;      # n / N para saltar entre archivos
+      navigate = true; # n / N para saltar entre archivos
       line-numbers = true;
     };
   };
