@@ -5,6 +5,10 @@
 { config, pkgs, lib, ... }:
 
 {
+  imports = [
+    ./vscode.nix  # VS Code con perfiles por lenguaje
+  ];
+
   home.username = "brais";
   home.homeDirectory = "/home/brais";
 
@@ -34,6 +38,7 @@
   # Fuente con iconos (Nerd Font): la necesitan starship y eza para los iconos.
   home.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
+    nixfmt # formateador oficial de Nix: nixfmt archivo.nix
   ];
   fonts.fontconfig.enable = true;
 
