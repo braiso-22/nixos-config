@@ -98,7 +98,7 @@
 
   # Install firefox.
   programs.firefox.enable = true;
-  programs.git.enable = true;
+  programs.git.enable = true; # a nivel de sistema (lo usa root); la config del usuario está en home.nix
   programs.claude-desktop.enable = true;
 
   # Allow unfree packages
@@ -107,7 +107,6 @@
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
-    gh # GitHub CLI
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
