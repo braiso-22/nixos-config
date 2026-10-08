@@ -1,8 +1,8 @@
 # Fase 3: IDEs y entornos de desarrollo
 
-- **Estado:** en curso (VS Code hecho; IntelliJ en marcha; faltan plantillas)
-- **Fecha:** 2026-10-07 (inicio)
-- **Commit / tag:** —
+- **Estado:** implementado
+- **Fecha:** 2026-10-07 → 2026-10-08
+- **Commit / tag:** 1da7164 (VS Code), 7607333 (nixfmt), 9752065 (IntelliJ), plantillas: ver tag 0.5.0
 
 ## Contexto
 Lenguajes con los que se trabaja: **Kotlin, TypeScript y C#**. IDEs elegidos:
@@ -95,6 +95,34 @@ pero se cambió (ver Decisiones). Rider, de momento no: C# en VS Code.
 - **No instalar lenguajes a nivel global** (JDK, Node, .NET): cada proyecto
   declara los suyos en un `flake.nix` con `devShell` y se cargan solos con
   direnv (`.envrc` con `use flake`). Así cada proyecto tiene sus versiones.
+- **Plantillas en este repo** (`templates/<lenguaje>/`, salida `templates` de
+  `flake.nix`), usables con `nix flake init -t ~/nixos-config#<lenguaje>`.
+  Son independientes del editor: Kotlin se usa con IntelliJ (`idea .`), no
+  con VS Code.
+  - **kotlin**: solo `jdk25` (la versión de los proyectos actuales). **Sin
+    `gradle` de nixpkgs**: los proyectos usan el wrapper (`./gradlew`) y el de
+    nixpkgs es 8.14 (antiguo). Con el JDK en el entorno, Gradle lo detecta como
+    toolchain y no descarga otro con foojay.
+  - **typescript**: `nodejs_24` (LTS) y `pnpm`.
+  - **csharp**: `dotnet-sdk_10` (LTS), con `DOTNET_ROOT` (lo necesita la
+    extensión C# de VS Code) y telemetría de .NET desactivada.
+  - Cada plantilla fija `nixos-26.05`; al crear el proyecto se genera su
+    `flake.lock`, así que el proyecto conserva sus versiones aunque se
+    actualice el sistema. Soportan aarch64/x86_64 Linux y Mac ARM (por si se
+    comparten).
+  - Sin `.gitignore` en la plantilla (chocaría con el del proyecto): el mensaje
+    de bienvenida recuerda añadir `.direnv/`.
+  - **Comando `nuevo-proyecto <lenguaje>`** (`nuevo-proyecto.nix`): hace
+    `nix flake init`, fija nixpkgs a **la misma revisión que el sistema**
+    (`nix flake lock --override-input nixpkgs github:NixOS/nixpkgs/$(nixos-version --revision)`),
+    `git add`, añade `.direnv/` al `.gitignore` y `direnv allow`. Motivo: con
+    la última `nixos-26.05` (más nueva que la del sistema) no se reutiliza nada
+    de lo instalado: Kotlin 627 → 94 MiB, TypeScript 177 → 144, C# 363 → 308
+    (total 1,17 GB → 546 MiB, y lo mismo en disco). El lock guarda
+    `original = nixos-26.05`, así que `nix flake update` en el proyecto lo
+    lleva a la última estable, y apunta a GitHub (sirve en otra máquina).
+    Alternativa descartada: registro `nixpkgs` del sistema (lock con ruta
+    `/nix/store`, no portable).
 
 ## Plan
 - [x] Investigar `nix-vscode-extensions` y Kotlin (descartado, ver arriba)
@@ -118,12 +146,26 @@ pero se cambió (ver Decisiones). Rider, de momento no: C# en VS Code.
       y ~20 GiB retenidos por 11 generaciones antiguas. Solución: borrar
       generaciones (dejar las 3 últimas) y limpiar; a medio plazo, agrandar
       el disco de la VM y activar la limpieza automática (ver `ideas.md`)
-- [ ] Plantillas de `devShell` para Kotlin (JDK + gradle), TypeScript (node +
-      pnpm) y C# (dotnet-sdk). Decidir dónde guardarlas (¿`templates/` en este
-      repo, usables con `nix flake init -t`?)
-- [ ] Probar un proyecto de ejemplo de cada lenguaje
+- [x] Plantillas en `templates/` (kotlin: jdk25; typescript: node 24 + pnpm;
+      csharp: dotnet 10) y comando `nuevo-proyecto`
+- [x] Probar cada plantilla en un proyecto nuevo con git: entornos cargan
+      (JDK 25.0.4 + JAVA_HOME; node 24.21 + pnpm 11.27; dotnet 10.0.401 +
+      DOTNET_ROOT) y un `dotnet new console` + `dotnet run` funciona
+- [x] Aplicar (`nuevo-proyecto` está en home.nix; 2,6 MiB) y cerrar la fase:
+      mover a implementado, commit y tag 0.5.0
 
 ## Resultado
+### Resumen
+- **VS Code** con perfiles default / typescript / csharp (`vscode.nix`).
+- **IntelliJ IDEA** de nixpkgs (`jetbrains.nix`), gratis sin licencia para
+  Kotlin. Rider no instalado (gratis para uso no comercial si hace falta).
+- **Plantillas** `templates/{kotlin,typescript,csharp}` + comando
+  **`nuevo-proyecto <lenguaje>`**. Uso:
+  `mkdir app && cd app && git init && nuevo-proyecto typescript`.
+- Todo el repo formateado con nixfmt.
+- Pendiente fuera de esta fase: el fallo del plugin Kotlin Multiplatform
+  (ver "Problemas conocidos") y el disco de 41 GB (ver `todo/ideas.md`).
+
 ### VS Code (2026-10-07)
 - VS Code 1.119.0; el `switch` tardó ~2 min (descarga VS Code y extensiones C#).
 - `code --list-extensions --profile <perfil>` confirma cada perfil: Default

@@ -13,6 +13,7 @@
   imports = [
     ./vscode.nix # VS Code con perfiles por lenguaje
     ./jetbrains.nix # IntelliJ IDEA
+    ./nuevo-proyecto.nix # comando nuevo-proyecto (plantillas de templates/)
   ];
 
   home.username = "brais";

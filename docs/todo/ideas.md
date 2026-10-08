@@ -7,6 +7,10 @@ una, se crea su propio archivo en `todo/`.
   aplicar y limpia generaciones viejas (`programs.nh` con `clean.enable`).
 - **Limpieza automática** de generaciones viejas y de `/nix/store`
   (`nix.gc.automatic`, `nix.optimise.automatic`): la VM tiene 41 GB de disco.
+- **Agrandar el disco de la VM** (41 GB → 80–100 GB): con IntelliJ y la
+  limpieza manual ya se llenó una vez (fase 3). Se hace con la VM apagada en
+  UTM (Mac) y luego, en NixOS, ampliar la partición `/dev/vda2` (ext4,
+  última partición del disco) con `growpart` + `resize2fs`.
 - **atuin**: historial de bash más potente que fzf (por carpeta, por resultado).
   Se descartó en la fase 2 para no complicar.
 - **tmux o zellij**: paneles y sesiones en la terminal que sobreviven al cerrarla.

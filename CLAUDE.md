@@ -33,6 +33,8 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 - No hay `system =` en `nixosSystem`: la arquitectura sale de `nixpkgs.hostPlatform` en `hardware-configuration.nix`.
 - `configuration.nix`: lo del **sistema** (arranque, servicios, escritorio, usuarios).
 - `home.nix`: lo del **usuario** con Home Manager (herramientas de terminal, IDEs, dotfiles). Se aplica con el mismo `nixos-rebuild switch`. Las herramientas del usuario van aquí.
+  - Importa módulos propios: `vscode.nix` (VS Code con un perfil por lenguaje: default, typescript, csharp), `jetbrains.nix` (IntelliJ IDEA de nixpkgs) y `nuevo-proyecto.nix` (comando del mismo nombre).
+- `templates/<lenguaje>/` (kotlin, typescript, csharp): plantillas de entorno por proyecto (`devShell` + `.envrc` para direnv), expuestas como salida `templates` de `flake.nix`. **No cambian el sistema** (no hace falta `switch` para editarlas). Se usan con `nuevo-proyecto <lenguaje>`, que fija el nixpkgs de cada proyecto a la revisión del sistema para reutilizar lo instalado. Los lenguajes (JDK, Node, .NET) no se instalan en el sistema.
 - En ambos, si un programa tiene módulo `programs.<nombre>`, se prefiere a añadir el paquete suelto (`home.packages` o `environment.systemPackages`): el módulo configura también la integración (bash, git…).
 - Los `.nix` siguen el estilo de **nixfmt**: después de editar uno, pásale `nixfmt` (VS Code lo hace al guardar con Ctrl+S). Excepto `hardware-configuration.nix`.
 - `hardware-configuration.nix` lo genera `nixos-generate-config`: no lo edites.
@@ -41,5 +43,6 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 ## Trampas
 
 - Con flakes, Nix **solo ve archivos añadidos a git**: un archivo nuevo necesita `git add` antes de `dry-build`/`switch`, o dará "does not exist".
+- **Disco justo (41 GB)**: compilar paquetes no libres grandes (IntelliJ) llega a ~19 GB de pico. Si el `switch` falla con "No space left on device": borrar generaciones viejas (`sudo nix-env --delete-generations +3 --profile /nix/var/nix/profiles/system`) y `sudo nix-collect-garbage`. `dry-build` no cuenta lo que se descarga de fuera de la caché (VS Code, IntelliJ, extensiones): estímalo aparte.
 - Archivos creados por el usuario con `sudo` quedan como `root` y no podrás editarlos; pídele `sudo chown brais:users <archivo>`.
 - Copia de seguridad de la `/etc/nixos` original (pre-flake, con channels) en `/etc/nixos.bak`.
