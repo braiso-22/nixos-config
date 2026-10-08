@@ -1,22 +1,46 @@
 # Fase 3: IDEs y entornos de desarrollo
 
-- **Estado:** en curso (VS Code hecho; faltan JetBrains Toolbox y plantillas)
+- **Estado:** en curso (VS Code hecho; IntelliJ en marcha; faltan plantillas)
 - **Fecha:** 2026-10-07 (inicio)
 - **Commit / tag:** —
 
 ## Contexto
 Lenguajes con los que se trabaja: **Kotlin, TypeScript y C#**. IDEs elegidos:
-**VS Code** y **JetBrains Toolbox** (para instalar IntelliJ IDEA y Rider).
+**VS Code** e **IntelliJ IDEA** (de nixpkgs). Se pidió JetBrains Toolbox,
+pero se cambió (ver Decisiones). Rider, de momento no: C# en VS Code.
 
 ## Decisiones
 - **VS Code** (oficial de Microsoft, no VSCodium) con `programs.vscode` de Home
   Manager: extensiones y `settings.json` declarados en el repo.
   Comprobado: `vscode` 1.119 está disponible para aarch64-linux.
-- **JetBrains Toolbox**: comprobado que `jetbrains-toolbox` existe para
-  aarch64-linux. Los IDEs que instala Toolbox son binarios descargados, no de
-  nixpkgs; puede que necesiten `programs.nix-ld` (ya activado) y librerías extra.
-  Alternativa si falla: `jetbrains.idea` y `jetbrains.rider` de nixpkgs
-  (`idea-community` ya no existe; JetBrains lo unificó en `idea`).
+- **IntelliJ IDEA de nixpkgs** (`pkgs.jetbrains.idea`, en `jetbrains.nix`), no
+  JetBrains Toolbox. Motivos:
+  - El paquete `jetbrains-toolbox` de nixos-26.05 está **roto**: fija la
+    versión 3.1.0, que JetBrains retiró de su web (404). `master` ya tiene la
+    3.8.1; se podía copiar su receta al repo, pero se descartó.
+  - Pensando en compartir el setup con un equipo (~10 personas, ver
+    `todo/ideas.md`): con nixpkgs **todos tienen la misma versión** (fijada
+    en `flake.lock`), las actualizaciones las decide y prueba quien gestiona
+    el repo, y volver atrás en NixOS restaura el IDE. Con Toolbox cada uno
+    actualiza por su cuenta (versiones distintas, soporte más difícil), los
+    IDEs viven en `~` fuera de Nix y dependen de `nix-ld` (se probó a darle
+    las librerías de la burbuja FHS de Toolbox; se deshizo).
+  - Contras aceptados: cada actualización descarga el IDE entero (no parches
+    como Toolbox); las versiones llegan cuando nixpkgs estable las incorpora;
+    otros IDEs hay que añadirlos al repo. Con un equipo: caché binaria propia
+    (Attic/Cachix) para no descargar en cada máquina.
+  - **Rider no** de momento (2,2 GB): C# en VS Code. Se añade con
+    `pkgs.jetbrains.rider` en `jetbrains.nix`.
+  - Uso: `idea .` desde la carpeta del proyecto para heredar el entorno de
+    direnv (JDK, Gradle). Desde el menú no lo hereda.
+  - Licencia (uso personal, sin licencia de pago): IntelliJ unificado (desde
+    2025.3) es **gratis sin suscripción ni activación**, también para uso
+    comercial, con todo lo de Java y Kotlin (y desde 2026.1 lo básico de
+    JS/TS). Solo lo avanzado de Ultimate es de pago (prueba de 30 días: no
+    hace falta). **Rider es gratis para uso no comercial** (licencia
+    "Non-commercial use" desde Help → Manage Licenses con cuenta JetBrains,
+    se renueva sola cada año si se usa); no se descartó por licencia sino por
+    tamaño.
 - **Perfiles de VS Code declarados en Nix** (`programs.vscode.profiles.<nombre>`),
   uno por lenguaje: `default` (solo comunes: repo NixOS y cosas sueltas),
   `typescript` (ESLint, Prettier) y `csharp` (C#, C# Dev Kit). **Sin perfil
@@ -79,7 +103,21 @@ Lenguajes con los que se trabaja: **Kotlin, TypeScript y C#**. IDEs elegidos:
       196 MiB, extensiones C# 204 MiB: lo no libre no está en la caché de NixOS
       y `dry-build` no lo cuenta)
 - [x] Aplicar, abrir VS Code y comprobar los perfiles
-- [ ] JetBrains Toolbox; probar que IntelliJ y Rider arrancan
+- [x] Toolbox: paquete roto en 26.05 → IntelliJ de nixpkgs (ver Decisiones)
+- [x] `dry-build` de IntelliJ: 2,0 GiB de caché (JDKs de JetBrains y
+      herramientas para prepararlo) + 1,5 GB de JetBrains. Tras aplicar, la
+      limpieza (`nix-collect-garbage`) libera lo que solo se usó para prepararlo
+- [x] Aplicar y probar que IntelliJ arranca (2.º intento, tras liberar 17,5 GiB:
+      OK en 7 min; **pico real de ~19 GB** de disco, no 10). Arranca bien;
+      problema con Gradle en "Problemas conocidos".
+      Historial del 1.er intento: **Primer intento fallido (2026-10-07):
+      disco lleno** ("No space left on device" al copiar IntelliJ; la
+      configuración activa no cambió). Prepararlo necesita a la vez el
+      tarball, su versión descomprimida, la copia final y las herramientas
+      de compilación (~10 GB de pico). Disco de 41 GB: sistema actual 9,5 GiB
+      y ~20 GiB retenidos por 11 generaciones antiguas. Solución: borrar
+      generaciones (dejar las 3 últimas) y limpiar; a medio plazo, agrandar
+      el disco de la VM y activar la limpieza automática (ver `ideas.md`)
 - [ ] Plantillas de `devShell` para Kotlin (JDK + gradle), TypeScript (node +
       pnpm) y C# (dotnet-sdk). Decidir dónde guardarlas (¿`templates/` en este
       repo, usables con `nix flake init -t`?)
@@ -95,3 +133,16 @@ Lenguajes con los que se trabaja: **Kotlin, TypeScript y C#**. IDEs elegidos:
   `~/.vscode/extensions/` y cada perfil tiene su `extensions.json` con su lista
   (`~/.config/Code/User/profiles/<perfil>/`). Los perfiles se registran en
   `~/.config/Code/User/globalStorage/storage.json`.
+
+### Problemas conocidos de IntelliJ en esta VM (Linux ARM64)
+- **"Unknown host target: linux aarch64" al ejecutar tareas Gradle desde el
+  IDE** (aunque el proyecto sea solo Kotlin/JVM). Lo provoca el plugin
+  **Kotlin Multiplatform** (`kmm-plugin`, instalado aparte, no viene de serie):
+  intercepta cada ejecución de Gradle y pregunta por el host de Kotlin/Native,
+  que no admite Linux ARM64. **Sin resolver:** se borró `kmm-plugin` y sigue
+  fallando; la misma clase (`MPPDebugExecutionAware`) está también en
+  `nativeDebug-plugin` (Native Debugging Support), que sigue instalado:
+  probablemente haya que quitar ese también. Se aparcó (2026-10-08).
+  Alternativas que no dependen de eso: `./gradlew` desde la terminal, o "Build and run using:
+  IntelliJ IDEA". Kotlin/Native (KMP con targets nativos/iOS) no compila en
+  Linux ARM64 en ningún caso: eso se hace en el Mac.

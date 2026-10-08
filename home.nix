@@ -12,6 +12,7 @@
 {
   imports = [
     ./vscode.nix # VS Code con perfiles por lenguaje
+    ./jetbrains.nix # IntelliJ IDEA
   ];
 
   home.username = "brais";
