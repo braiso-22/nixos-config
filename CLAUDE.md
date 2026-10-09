@@ -43,6 +43,6 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 ## Trampas
 
 - Con flakes, Nix **solo ve archivos añadidos a git**: un archivo nuevo necesita `git add` antes de `dry-build`/`switch`, o dará "does not exist".
-- **Disco justo (41 GB)**: compilar paquetes no libres grandes (IntelliJ) llega a ~19 GB de pico. Si el `switch` falla con "No space left on device": borrar generaciones viejas (`sudo nix-env --delete-generations +3 --profile /nix/var/nix/profiles/system`) y `sudo nix-collect-garbage`. `dry-build` no cuenta lo que se descarga de fuera de la caché (VS Code, IntelliJ, extensiones): estímalo aparte.
+- **Disco justo (48 GB, ampliado desde 41; el Mac no tiene más espacio)**: hay limpieza automática semanal (`nix.gc`, generaciones de más de 14 días, y `nix.optimise`), pero compilar paquetes no libres grandes (IntelliJ) llega a ~19 GB de pico. Si el `switch` falla con "No space left on device": borrar generaciones viejas (`sudo nix-env --delete-generations +3 --profile /nix/var/nix/profiles/system`) y `sudo nix-collect-garbage`. `dry-build` no cuenta lo que se descarga de fuera de la caché (VS Code, IntelliJ, extensiones): estímalo aparte.
 - Archivos creados por el usuario con `sudo` quedan como `root` y no podrás editarlos; pídele `sudo chown brais:users <archivo>`.
 - Copia de seguridad de la `/etc/nixos` original (pre-flake, con channels) en `/etc/nixos.bak`.
