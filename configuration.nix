@@ -17,6 +17,7 @@
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10; # generaciones en el menú de arranque
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "nixos"; # Define your hostname.
@@ -170,6 +171,20 @@
     "nix-command"
     "flakes"
   ];
+
+  # Limpieza automática (el disco de la VM es pequeño). Si la VM está apagada
+  # a la hora programada, se ejecuta al arrancar.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    # Generaciones de más de 14 días: se pueden recuperar durante 2 semanas.
+    options = "--delete-older-than 14d";
+  };
+  # Deduplica la tienda de Nix: archivos idénticos ocupan una sola vez.
+  nix.optimise = {
+    automatic = true;
+    dates = [ "weekly" ];
+  };
   programs.nix-ld.enable = true;
   services.spice-vdagentd.enable = true;
   services.qemuGuest.enable = true;
