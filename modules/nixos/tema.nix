@@ -1,6 +1,7 @@
 # Tema común con Stylix (módulo de NixOS; se aplica también a Home Manager).
 # Colores Catppuccin Mocha, fuentes y fondo para terminal, GTK, VS Code, bat,
-# fzf, btop, rofi, dunst, bspwm, LightDM, GNOME…
+# fzf, btop, rofi, dunst, bspwm, GNOME… El login (SDDM) lleva su propio tema
+# Catppuccin Macchiato: modules/nixos/escritorio.nix.
 # Lo que Stylix no cubre (polybar) usa config.lib.stylix.colors en modules/home/escritorio.nix.
 
 { pkgs, ... }:

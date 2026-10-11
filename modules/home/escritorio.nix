@@ -1,4 +1,4 @@
-# Escritorio bspwm (lo importa modules/home). La sesión "bspwm" de LightDM
+# Escritorio bspwm (lo importa modules/home). La sesión "bspwm" de SDDM
 # ejecuta ~/.hm-xsession, que arranca todo esto. Colores y fuentes:
 # modules/nixos/tema.nix.
 #

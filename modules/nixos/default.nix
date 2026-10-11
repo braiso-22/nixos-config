@@ -5,7 +5,7 @@
 {
   imports = [
     ./sistema.nix # arranque, red, idioma, teclado, sonido, Nix
-    ./escritorio.nix # X11, LightDM, sesión bspwm, bloqueo de pantalla
+    ./escritorio.nix # X11, login SDDM, sesión bspwm, bloqueo de pantalla
     ./programas.nix # Firefox, git, Claude, Docker rootless
     ./vm.nix # empresa.vm: invitado QEMU/UTM
     ./gnome.nix # empresa.gnome: GNOME de reserva

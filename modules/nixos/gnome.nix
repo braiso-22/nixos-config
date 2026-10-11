@@ -1,5 +1,5 @@
 # empresa.gnome.enable: GNOME (Wayland) como sesión de reserva junto a bspwm.
-# Se elige en el icono de sesiones de LightDM.
+# Se elige en el engranaje de la pantalla de login (SDDM).
 
 { config, lib, ... }:
 
