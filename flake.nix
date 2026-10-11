@@ -60,7 +60,7 @@
           kotlin = {
             path = ./templates/kotlin;
             description = "Proyecto Kotlin: JDK 25 (Gradle con ./gradlew)";
-            welcomeText = bienvenida "Abre IntelliJ desde aquí: idea .";
+            welcomeText = bienvenida "Compila y ejecuta desde la terminal: ./gradlew run";
           };
           typescript = {
             path = ./templates/typescript;

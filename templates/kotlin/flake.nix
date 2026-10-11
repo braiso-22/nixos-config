@@ -1,6 +1,6 @@
 # Entorno del proyecto Kotlin (plantilla de ~/nixos-config).
 # direnv lo carga al entrar en la carpeta (.envrc: "use flake").
-# Abre IntelliJ desde aquí (idea .) para que use este JDK.
+# Compila desde la terminal con ./gradlew (usa este JDK).
 {
   description = "Proyecto Kotlin";
 

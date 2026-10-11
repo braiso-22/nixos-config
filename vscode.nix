@@ -7,8 +7,8 @@
 # Las extensiones solo se añaden aquí (no desde el marketplace de VS Code).
 # Al aplicar un cambio que cree un perfil nuevo, VS Code debe estar cerrado.
 #
-# Kotlin no tiene perfil: se usa IntelliJ. Para extensiones que no estén en
-# nixpkgs, ver la tarea de IDEs en docs/ (flake nix-vscode-extensions).
+# Kotlin no tiene perfil (se compila con ./gradlew). Para extensiones que no
+# estén en nixpkgs, ver la tarea de IDEs en docs/ (flake nix-vscode-extensions).
 
 {
   config,
