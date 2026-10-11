@@ -17,7 +17,7 @@
   };
 
   outputs =
-    { nixpkgs, ... }@inputs:
+    { self, nixpkgs, ... }@inputs:
     let
       # Un equipo = lo común (modules/nixos) + su máquina (hosts/<host>) + las
       # personas que lo usan (users/<persona>).
@@ -38,7 +38,16 @@
           host = "test-nixos-vm"; # la VM de pruebas
           users = [ "brais" ];
         };
+        iso-portatil = mkHost {
+          host = "iso-portatil"; # USB de prueba para portátiles (x86_64)
+          users = [ "brais" ];
+        };
       };
+
+      # ISO del USB de prueba: nix build .#iso-portatil (se construye en GitHub
+      # Actions; la VM es aarch64 y la ISO, x86_64).
+      packages.x86_64-linux.iso-portatil =
+        self.nixosConfigurations.iso-portatil.config.system.build.isoImage;
 
       # Plantillas de proyecto: nix flake init -t ~/nixos-config#<nombre>
       templates =

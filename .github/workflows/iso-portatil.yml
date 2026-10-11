@@ -1,0 +1,38 @@
+# Construye la ISO del USB de prueba para portátiles (hosts/iso-portatil) en
+# una máquina x86_64 de GitHub y la deja para descargar durante 7 días.
+# Se lanza a mano: pestaña Actions → "ISO del portátil" → Run workflow,
+# o desde la terminal: gh workflow run iso-portatil.yml
+name: ISO del portátil
+
+on:
+  workflow_dispatch:
+
+jobs:
+  iso:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      # La máquina trae ~14 GB libres; la ISO necesita bastante más (paquetes
+      # descargados + la imagen). Se borran herramientas que no usamos.
+      - name: Liberar espacio en disco
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+
+      - uses: cachix/install-nix-action@v31
+
+      - name: Construir la ISO
+        run: |
+          nix build .#iso-portatil --print-build-logs
+          mkdir iso
+          cp -L result/iso/*.iso iso/
+          ls -lh iso/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iso-portatil
+          path: iso/*.iso
+          retention-days: 7
+          compression-level: 0 # la ISO ya va comprimida
