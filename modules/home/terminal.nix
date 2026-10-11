@@ -55,7 +55,7 @@
       ".." = "cd ..";
       "..." = "cd ../..";
       lg = "lazygit";
-      rebuild = "sudo nixos-rebuild switch --flake ~/nixos-config#nixos";
+      rebuild = "sudo nixos-rebuild switch --flake ~/nixos-config"; # sin #nombre: usa el del equipo (hostname)
     };
   };
 

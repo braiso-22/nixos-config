@@ -16,8 +16,8 @@ Antes de tocar nada, crea `docs/todo/<paquete>.md` (plantilla en `docs/README.md
 El nombre que dice el usuario no siempre es el atributo de nixpkgs (p. ej. "vs code" → `vscode`, "obs" → `obs-studio`). Compruébalo siempre contra el nixpkgs **fijado en `flake.lock`**, no contra unstable:
 
 ```bash
-nix eval --raw .#nixosConfigurations.nixos.pkgs.<attr>.meta.description
-nix eval .#nixosConfigurations.nixos.pkgs.<attr>.meta.available   # true = funciona en aarch64-linux
+nix eval --raw .#nixosConfigurations.test-nixos-vm.pkgs.<attr>.meta.description
+nix eval .#nixosConfigurations.test-nixos-vm.pkgs.<attr>.meta.available   # true = funciona en aarch64-linux
 ```
 
 Si no adivinas el atributo, busca en el mismo nixpkgs (la revisión es la del nodo al que apunta `root.inputs.nixpkgs` en `flake.lock`):
@@ -30,14 +30,14 @@ La primera búsqueda evalúa todo nixpkgs: tarda varios minutos y usa mucha memo
 
 ## 2. Elegir dónde añadirlo
 
-- **Programas del usuario** (herramientas de terminal, editores, apps de escritorio): en Home Manager: `modules/home/` si es para todos los usuarios (las herramientas de terminal, en `terminal.nix`), `users/<persona>/home.nix` si es solo de esa persona. Si Home Manager tiene módulo (`nix eval .#nixosConfigurations.nixos.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'` da `true`), usa `programs.<nombre>.enable = true;` (configura también la integración con bash, git…). Si no, añádelo a `home.packages`.
-- **Cosas del sistema** (servicios, drivers, lo que necesite root o permisos especiales): en `modules/nixos/` si es para todos los equipos (los programas, en `programas.nix`), `hosts/<pc>/default.nix` si es solo de esa máquina. Si existe módulo NixOS (`nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'` da `true`), usa `programs.<nombre>.enable = true;`; si no, `environment.systemPackages`.
+- **Programas del usuario** (herramientas de terminal, editores, apps de escritorio): en Home Manager: `modules/home/` si es para todos los usuarios (las herramientas de terminal, en `terminal.nix`), `users/<persona>/home.nix` si es solo de esa persona. Si Home Manager tiene módulo (`nix eval .#nixosConfigurations.test-nixos-vm.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'` da `true`), usa `programs.<nombre>.enable = true;` (configura también la integración con bash, git…). Si no, añádelo a `home.packages`.
+- **Cosas del sistema** (servicios, drivers, lo que necesite root o permisos especiales): en `modules/nixos/` si es para todos los equipos (los programas, en `programas.nix`), `hosts/<pc>/default.nix` si es solo de esa máquina. Si existe módulo NixOS (`nix eval .#nixosConfigurations.test-nixos-vm.options.programs --apply 'builtins.hasAttr "<nombre>"'` da `true`), usa `programs.<nombre>.enable = true;`; si no, `environment.systemPackages`.
 - Si dudas, pregunta al usuario explicando la diferencia en una frase.
 
 ## 3. Validar
 
 ```bash
-nixos-rebuild dry-build --flake .#nixos
+nixos-rebuild dry-build --flake .#test-nixos-vm
 ```
 
 Si falla, lee el error, corrígelo y vuelve a validar. Si va bien, dile al usuario el tamaño de descarga que aparece en `these N paths will be fetched (X MiB download…)`.
@@ -47,7 +47,7 @@ Si falla, lee el error, corrígelo y vuelve a validar. Si va bien, dile al usuar
 Dale el comando (tú no puedes usar `sudo`):
 
 ```bash
-sudo nixos-rebuild switch --flake ~/nixos-config#nixos
+sudo nixos-rebuild switch --flake ~/nixos-config
 ```
 
 Cuando diga que ha terminado, lee su terminal para comprobar que acabó con `Done.` sin errores. Después mueve el doc a `docs/implementado/`, propón un mensaje de commit en español (p. ej. `Añadir htop`) y **pregunta antes de hacer commit**.

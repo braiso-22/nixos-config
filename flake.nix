@@ -34,8 +34,8 @@
     in
     {
       nixosConfigurations = {
-        nixos = mkHost {
-          host = "nixos"; # la VM
+        test-nixos-vm = mkHost {
+          host = "test-nixos-vm"; # la VM de pruebas
           users = [ "brais" ];
         };
       };

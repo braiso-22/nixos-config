@@ -25,7 +25,7 @@
     variant = "";
   };
 
-  # Scroll natural (como en Mac). El de GNOME va por dconf (hosts/nixos).
+  # Scroll natural (como en Mac). El de GNOME va por dconf (gnome.nix).
   services.libinput = {
     mouse.naturalScrolling = true;
     touchpad.naturalScrolling = true;

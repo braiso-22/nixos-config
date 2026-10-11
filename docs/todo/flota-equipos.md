@@ -49,10 +49,11 @@ PR; nadie puede cambiar su sistema ni instalar software por su cuenta.
 ## Plan (por fases)
 - [x] Reorganizar el repo en `modules/`, `hosts/` y `users/` sin cambios
       funcionales (la VM como primer host)
-- [ ] Opciones propias `empresa.*` para lo opcional
+- [x] Opciones propias `empresa.*` para lo opcional (`empresa.vm`, `empresa.gnome`)
 - [ ] Lo que bspwm no trae y un portátil necesita: batería en polybar, Wi-Fi
       (nm-applet), brillo y volumen en sxhkd, suspender al cerrar la tapa,
-      monitores externos (autorandr), ahorro de energía
+      monitores externos (autorandr), ahorro de energía, `xdg.portal.config`
+      (sin GNOME, NixOS avisa de que falta elegir el portal)
 - [x] Contenedores sin root (Docker rootless)
 - [ ] Bloqueo: usuarios sin `wheel`, sin `nix-ld`, política de VS Code
 - [ ] `system.autoUpgrade` desde el repo y botón de actualizar

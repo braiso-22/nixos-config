@@ -160,9 +160,7 @@ in
   xsession = {
     enable = true;
     scriptPath = ".hm-xsession"; # lo ejecuta la sesión de modules/nixos/escritorio.nix
-    # Portapapeles compartido con el Mac y ajuste de resolución (en GNOME lo
-    # arranca GNOME; en bspwm hay que hacerlo a mano).
-    initExtra = "${pkgs.spice-vdagent}/bin/spice-vdagent";
+    # spice-vdagent (portapapeles con el Mac) lo añade empresa.vm (modules/nixos/vm.nix).
 
     windowManager.bspwm = {
       enable = true;

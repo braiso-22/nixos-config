@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es este repo
 
-Configuración de NixOS de una única máquina: una VM QEMU **aarch64** (UTM en un Mac, sin aceleración gráfica) con escritorio **bspwm** (X11) y GNOME de reserva (hostname `nixos`, usuario `brais`). `/etc/nixos` es un enlace simbólico a este repo, así que lo que hay aquí *es* la configuración del sistema; los archivos se editan sin `sudo`.
+Configuración de NixOS de una única máquina: una VM QEMU **aarch64** (UTM en un Mac, sin aceleración gráfica) con escritorio **bspwm** (X11) y GNOME de reserva (hostname `test-nixos-vm`, usuario `brais`). `/etc/nixos` es un enlace simbólico a este repo, así que lo que hay aquí *es* la configuración del sistema; los archivos se editan sin `sudo`.
 
 ## Cómo trabajar con el usuario
 
@@ -16,11 +16,11 @@ Configuración de NixOS de una única máquina: una VM QEMU **aarch64** (UTM en 
 ## Comandos
 
 ```bash
-nixos-rebuild dry-build --flake .#nixos            # validar sin sudo (evalúa y dice qué se descargaría/compilaría)
-sudo nixos-rebuild switch --flake ~/nixos-config#nixos   # aplicar (lo ejecuta el usuario)
-nix eval --raw .#nixosConfigurations.nixos.pkgs.<attr>.meta.description   # comprobar que un paquete existe en el nixpkgs fijado
-nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'   # ¿tiene módulo programs.<nombre>?
-nix eval .#nixosConfigurations.nixos.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'   # ¿tiene módulo programs.<nombre> en Home Manager?
+nixos-rebuild dry-build --flake .#test-nixos-vm    # validar sin sudo (evalúa y dice qué se descargaría/compilaría)
+sudo nixos-rebuild switch --flake ~/nixos-config   # aplicar (lo ejecuta el usuario; sin #nombre usa el hostname; alias: rebuild)
+nix eval --raw .#nixosConfigurations.test-nixos-vm.pkgs.<attr>.meta.description   # comprobar que un paquete existe en el nixpkgs fijado
+nix eval .#nixosConfigurations.test-nixos-vm.options.programs --apply 'builtins.hasAttr "<nombre>"'   # ¿tiene módulo programs.<nombre>?
+nix eval .#nixosConfigurations.test-nixos-vm.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'   # ¿tiene módulo programs.<nombre> en Home Manager?
 nix flake update nixpkgs                           # actualizar nixpkgs dentro de nixos-26.05 (cambia flake.lock)
 nixfmt <archivo>.nix                                # formatear (estilo oficial de Nix)
 ```
@@ -29,14 +29,15 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 
 ## Arquitectura
 
-Preparado para varios equipos (fase 1 de `docs/todo/flota-equipos.md`): lo común, lo de cada máquina y lo de cada persona van separados. Hoy solo hay un equipo, la VM (`nixos`).
+Preparado para varios equipos (fase 1 de `docs/todo/flota-equipos.md`): lo común, lo de cada máquina y lo de cada persona van separados. Hoy solo hay un equipo, la VM de pruebas (`test-nixos-vm`).
 
 - `flake.nix`: cuatro inputs: `nixpkgs` (rama estable **nixos-26.05**; el usuario rechazó unstable expresamente), `claude-desktop` (flake de terceros `github:poeck/claude-desktop-nix-flake`, cuyo módulo se activa con `programs.claude-desktop.enable`), `home-manager` (rama `release-26.05`, con `follows` al nixpkgs del sistema), cargado como módulo de NixOS, y `stylix` (rama `release-26.05`, `follows`), tema común. El input de claude-desktop trae su propio nixpkgs-unstable en `flake.lock` (`nixpkgs`), distinto del del sistema (`nixpkgs_2`).
   - `mkHost { host = "<pc>"; users = [ "<persona>" ... ]; }` monta cada `nixosConfigurations.<pc>` con `modules/nixos` + `hosts/<pc>` + `users/<persona>`. Los módulos reciben los inputs con `specialArgs` (`{ inputs, ... }`).
   - No hay `system =`: la arquitectura sale de `nixpkgs.hostPlatform` en el `hardware-configuration.nix` de cada host.
-- `modules/nixos/`: lo **común del sistema**. `default.nix` importa el resto y los módulos de los inputs; `sistema.nix` (arranque, red, idioma, sonido, Nix y su limpieza), `escritorio.nix` (X11, LightDM, sesión bspwm, bloqueo, teclado, scroll), `programas.nix` (Firefox, git, Claude, Docker rootless), `home-manager.nix` (ajustes globales de HM) y `tema.nix` (Stylix con Catppuccin Mocha, fuentes, cursor y fondo; se aplica también en Home Manager; objetivos `gnome`, `gtksourceview` y `nixos-icons` desactivados: recompilan GNOME sin caché, ~1 GiB y mucha compilación).
+- `modules/nixos/`: lo **común del sistema**. `default.nix` importa el resto y los módulos de los inputs; `sistema.nix` (arranque, red, idioma, sonido, Nix y su limpieza), `escritorio.nix` (X11, LightDM, sesión bspwm, bloqueo, teclado, scroll), `programas.nix` (Firefox, git, Claude, Docker rootless), `vm.nix` y `gnome.nix` (opciones `empresa.*`, abajo), `home-manager.nix` (ajustes globales de HM) y `tema.nix` (Stylix con Catppuccin Mocha, fuentes, cursor y fondo; se aplica también en Home Manager; objetivos `gnome`, `gtksourceview` y `nixos-icons` desactivados: recompilan GNOME sin caché, ~1 GiB y mucha compilación).
+- **Opciones `empresa.*`** (fase 2): lo que llevan solo algunos equipos. Cada opción se declara en el mismo archivo de `modules/nixos/` que la implementa (`options.empresa.<x>.enable = lib.mkEnableOption ...;` + `config = lib.mkIf config.empresa.<x>.enable { ... };`), desactivada por defecto, y el host la activa (`empresa.vm.enable = true;`). Si necesita algo de Home Manager para todos los usuarios, lo añade con `home-manager.sharedModules`. Hoy: `empresa.vm` (invitado QEMU/UTM: spice, qemuGuest, `spice-vdagent` en la sesión bspwm) y `empresa.gnome` (GNOME de reserva y su dconf).
 - `modules/home/`: lo **común del usuario** (Home Manager). `terminal.nix` (bash, git, gh, starship, fzf, direnv...), `vscode.nix` (un perfil por lenguaje: default, typescript, csharp), `nuevo-proyecto.nix` (comando del mismo nombre) y `escritorio.nix` (bspwm, sxhkd, polybar, rofi, picom, dunst, alacritty, flameshot, bloqueo). Los atajos están en la lista `atajos` de `escritorio.nix`, de la que salen sxhkd y la chuleta (Cmd+I). Se aplica con el mismo `nixos-rebuild switch`.
-- `hosts/<pc>/`: lo de **cada máquina**. `default.nix` (hostname, `system.stateVersion` y lo propio) + `hardware-configuration.nix`. En `hosts/nixos` (la VM): GNOME de reserva y su dconf, invitado QEMU (spice, qemuGuest) y `nix-ld`.
+- `hosts/<pc>/`: lo de **cada máquina**. `default.nix` (hostname, `system.stateVersion` y lo propio) + `hardware-configuration.nix`. En `hosts/test-nixos-vm`: activa `empresa.vm` y `empresa.gnome`, y `nix-ld`.
 - `users/<persona>/`: lo de **cada persona**. `default.nix` (cuenta `users.users.<persona>` y `home-manager.users.<persona> = import ./home.nix`) y `home.nix` (importa `../../modules/home`; identidad de git, `home.stateVersion` y sus programas propios).
 - Dónde va algo nuevo: herramientas de usuario → `modules/home` si es para todos, `users/<persona>/home.nix` si es solo de esa persona; servicios y cosas con root → `modules/nixos`, o `hosts/<pc>` si es solo de esa máquina.
 - `templates/<lenguaje>/` (kotlin, typescript, csharp): plantillas de entorno por proyecto (`devShell` + `.envrc` para direnv), expuestas como salida `templates` de `flake.nix`. **No cambian el sistema** (no hace falta `switch` para editarlas). Se usan con `nuevo-proyecto <lenguaje>`, que fija el nixpkgs de cada proyecto a la revisión del sistema para reutilizar lo instalado. Los lenguajes (JDK, Node, .NET) no se instalan en el sistema.
@@ -44,7 +45,7 @@ Preparado para varios equipos (fase 1 de `docs/todo/flota-equipos.md`): lo comú
 - Los `.nix` siguen el estilo de **nixfmt**: después de editar uno, pásale `nixfmt` (VS Code lo hace al guardar con Ctrl+S). Excepto `hardware-configuration.nix`.
 - `hardware-configuration.nix` lo genera `nixos-generate-config`: no lo edites.
 - `system.stateVersion` y `home.stateVersion` (`"26.05"`) no se cambian nunca, ni al actualizar.
-- Para comprobar que una reorganización no cambia nada: comparar `nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath` antes y después. Ojo: mover definiciones entre archivos puede cambiar el orden de las listas (p. ej. paquetes de `home-manager-path`) y con ello el hash, sin cambio funcional.
+- Para comprobar que una reorganización no cambia nada: comparar `nix eval --raw .#nixosConfigurations.test-nixos-vm.config.system.build.toplevel.drvPath` antes y después. Ojo: mover definiciones entre archivos puede cambiar el orden de las listas (p. ej. paquetes de `home-manager-path`) y con ello el hash, sin cambio funcional.
 
 ## Trampas
 
