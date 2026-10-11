@@ -1,7 +1,7 @@
 # Tema común con Stylix (módulo de NixOS; se aplica también a Home Manager).
 # Colores Catppuccin Mocha, fuentes y fondo para terminal, GTK, VS Code, bat,
 # fzf, btop, rofi, dunst, bspwm, LightDM, GNOME…
-# Lo que Stylix no cubre (polybar) usa config.lib.stylix.colors en escritorio.nix.
+# Lo que Stylix no cubre (polybar) usa config.lib.stylix.colors en modules/home/escritorio.nix.
 
 { pkgs, ... }:
 
@@ -49,7 +49,4 @@
       nixos-icons.enable = false;
     };
   };
-
-  # Stylix solo sabe dar tema a Qt (flameshot) con qtct.
-  home-manager.users.brais.stylix.targets.qt.platform = "qtct";
 }

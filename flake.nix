@@ -2,14 +2,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     claude-desktop.url = "github:poeck/claude-desktop-nix-flake";
-    # Home Manager: configuración del usuario (dotfiles) declarada en home.nix.
-    # La rama release-26.05 va a juego con nixpkgs, y "follows" hace que use
-    # el mismo nixpkgs que el sistema en vez de descargar otro.
+    # Home Manager: configuración de cada usuario (dotfiles), en modules/home y
+    # users/<persona>/home.nix. La rama release-26.05 va a juego con nixpkgs, y
+    # "follows" hace que use el mismo nixpkgs que el sistema en vez de otro.
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Stylix: un tema de colores y fuentes para todo (tema.nix).
+    # Stylix: un tema de colores y fuentes para todo (modules/nixos/tema.nix).
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,32 +17,27 @@
   };
 
   outputs =
+    { nixpkgs, ... }@inputs:
+    let
+      # Un equipo = lo común (modules/nixos) + su máquina (hosts/<host>) + las
+      # personas que lo usan (users/<persona>).
+      mkHost =
+        { host, users }:
+        nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; }; # los módulos reciben los inputs del flake
+          modules = [
+            ./modules/nixos
+            (./hosts + "/${host}")
+          ]
+          ++ map (persona: ./users + "/${persona}") users;
+        };
+    in
     {
-      nixpkgs,
-      claude-desktop,
-      home-manager,
-      stylix,
-      ...
-    }:
-    {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./configuration.nix
-          claude-desktop.nixosModules.default
-          stylix.nixosModules.stylix # también aplica el tema en Home Manager
-          ./tema.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true; # usa el mismo pkgs (y allowUnfree) que el sistema
-              useUserPackages = true; # instala los paquetes del usuario en su perfil
-              # Si ya existe un archivo que Home Manager quiere crear, lo renombra
-              # a *.hm-backup en vez de fallar.
-              backupFileExtension = "hm-backup";
-              users.brais = import ./home.nix;
-            };
-          }
-        ];
+      nixosConfigurations = {
+        nixos = mkHost {
+          host = "nixos"; # la VM
+          users = [ "brais" ];
+        };
       };
 
       # Plantillas de proyecto: nix flake init -t ~/nixos-config#<nombre>

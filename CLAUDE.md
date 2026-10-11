@@ -29,17 +29,22 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 
 ## Arquitectura
 
-- `flake.nix` define `nixosConfigurations.nixos` con cuatro inputs: `nixpkgs` (rama estable **nixos-26.05**; el usuario rechazó unstable expresamente), `claude-desktop` (flake de terceros `github:poeck/claude-desktop-nix-flake`, cuyo módulo se activa con `programs.claude-desktop.enable`); `home-manager` (rama `release-26.05`, con `follows` al nixpkgs del sistema), cargado como módulo de NixOS; y `stylix` (rama `release-26.05`, `follows`), tema común. El input de claude-desktop trae su propio nixpkgs-unstable en `flake.lock` (`nixpkgs`), distinto del del sistema (`nixpkgs_2`).
-- No hay `system =` en `nixosSystem`: la arquitectura sale de `nixpkgs.hostPlatform` en `hardware-configuration.nix`.
-- `configuration.nix`: lo del **sistema** (arranque, servicios, escritorio, usuarios).
-- `tema.nix` (módulo NixOS): Stylix con Catppuccin Mocha, fuentes, cursor y fondo; se aplica también en Home Manager. Objetivos `gnome`, `gtksourceview` y `nixos-icons` desactivados: recompilan GNOME sin caché (~1 GiB y mucha compilación).
-- `home.nix`: lo del **usuario** con Home Manager (herramientas de terminal, IDEs, dotfiles). Se aplica con el mismo `nixos-rebuild switch`. Las herramientas del usuario van aquí.
-  - Importa módulos propios: `vscode.nix` (VS Code con un perfil por lenguaje: default, typescript, csharp), `nuevo-proyecto.nix` (comando del mismo nombre) y `escritorio.nix` (bspwm, sxhkd, polybar, rofi, picom, dunst, alacritty, flameshot, bloqueo). Los atajos están en la lista `atajos` de `escritorio.nix`, de la que salen sxhkd y la chuleta (Cmd+I).
+Preparado para varios equipos (fase 1 de `docs/todo/flota-equipos.md`): lo común, lo de cada máquina y lo de cada persona van separados. Hoy solo hay un equipo, la VM (`nixos`).
+
+- `flake.nix`: cuatro inputs: `nixpkgs` (rama estable **nixos-26.05**; el usuario rechazó unstable expresamente), `claude-desktop` (flake de terceros `github:poeck/claude-desktop-nix-flake`, cuyo módulo se activa con `programs.claude-desktop.enable`), `home-manager` (rama `release-26.05`, con `follows` al nixpkgs del sistema), cargado como módulo de NixOS, y `stylix` (rama `release-26.05`, `follows`), tema común. El input de claude-desktop trae su propio nixpkgs-unstable en `flake.lock` (`nixpkgs`), distinto del del sistema (`nixpkgs_2`).
+  - `mkHost { host = "<pc>"; users = [ "<persona>" ... ]; }` monta cada `nixosConfigurations.<pc>` con `modules/nixos` + `hosts/<pc>` + `users/<persona>`. Los módulos reciben los inputs con `specialArgs` (`{ inputs, ... }`).
+  - No hay `system =`: la arquitectura sale de `nixpkgs.hostPlatform` en el `hardware-configuration.nix` de cada host.
+- `modules/nixos/`: lo **común del sistema**. `default.nix` importa el resto y los módulos de los inputs; `sistema.nix` (arranque, red, idioma, sonido, Nix y su limpieza), `escritorio.nix` (X11, LightDM, sesión bspwm, bloqueo, teclado, scroll), `programas.nix` (Firefox, git, Claude, Docker rootless), `home-manager.nix` (ajustes globales de HM) y `tema.nix` (Stylix con Catppuccin Mocha, fuentes, cursor y fondo; se aplica también en Home Manager; objetivos `gnome`, `gtksourceview` y `nixos-icons` desactivados: recompilan GNOME sin caché, ~1 GiB y mucha compilación).
+- `modules/home/`: lo **común del usuario** (Home Manager). `terminal.nix` (bash, git, gh, starship, fzf, direnv...), `vscode.nix` (un perfil por lenguaje: default, typescript, csharp), `nuevo-proyecto.nix` (comando del mismo nombre) y `escritorio.nix` (bspwm, sxhkd, polybar, rofi, picom, dunst, alacritty, flameshot, bloqueo). Los atajos están en la lista `atajos` de `escritorio.nix`, de la que salen sxhkd y la chuleta (Cmd+I). Se aplica con el mismo `nixos-rebuild switch`.
+- `hosts/<pc>/`: lo de **cada máquina**. `default.nix` (hostname, `system.stateVersion` y lo propio) + `hardware-configuration.nix`. En `hosts/nixos` (la VM): GNOME de reserva y su dconf, invitado QEMU (spice, qemuGuest) y `nix-ld`.
+- `users/<persona>/`: lo de **cada persona**. `default.nix` (cuenta `users.users.<persona>` y `home-manager.users.<persona> = import ./home.nix`) y `home.nix` (importa `../../modules/home`; identidad de git, `home.stateVersion` y sus programas propios).
+- Dónde va algo nuevo: herramientas de usuario → `modules/home` si es para todos, `users/<persona>/home.nix` si es solo de esa persona; servicios y cosas con root → `modules/nixos`, o `hosts/<pc>` si es solo de esa máquina.
 - `templates/<lenguaje>/` (kotlin, typescript, csharp): plantillas de entorno por proyecto (`devShell` + `.envrc` para direnv), expuestas como salida `templates` de `flake.nix`. **No cambian el sistema** (no hace falta `switch` para editarlas). Se usan con `nuevo-proyecto <lenguaje>`, que fija el nixpkgs de cada proyecto a la revisión del sistema para reutilizar lo instalado. Los lenguajes (JDK, Node, .NET) no se instalan en el sistema.
 - En ambos, si un programa tiene módulo `programs.<nombre>`, se prefiere a añadir el paquete suelto (`home.packages` o `environment.systemPackages`): el módulo configura también la integración (bash, git…).
 - Los `.nix` siguen el estilo de **nixfmt**: después de editar uno, pásale `nixfmt` (VS Code lo hace al guardar con Ctrl+S). Excepto `hardware-configuration.nix`.
 - `hardware-configuration.nix` lo genera `nixos-generate-config`: no lo edites.
-- `system.stateVersion = "26.05"` no se cambia nunca, ni al actualizar.
+- `system.stateVersion` y `home.stateVersion` (`"26.05"`) no se cambian nunca, ni al actualizar.
+- Para comprobar que una reorganización no cambia nada: comparar `nix eval --raw .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath` antes y después. Ojo: mover definiciones entre archivos puede cambiar el orden de las listas (p. ej. paquetes de `home-manager-path`) y con ello el hash, sin cambio funcional.
 
 ## Trampas
 

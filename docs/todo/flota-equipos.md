@@ -47,7 +47,7 @@ PR; nadie puede cambiar su sistema ni instalar software por su cuenta.
 - Cifrado de disco (LUKS): muy recomendable en portátiles.
 
 ## Plan (por fases)
-- [ ] Reorganizar el repo en `modules/`, `hosts/` y `users/` sin cambios
+- [x] Reorganizar el repo en `modules/`, `hosts/` y `users/` sin cambios
       funcionales (la VM como primer host)
 - [ ] Opciones propias `empresa.*` para lo opcional
 - [ ] Lo que bspwm no trae y un portátil necesita: batería en polybar, Wi-Fi

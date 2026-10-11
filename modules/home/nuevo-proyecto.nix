@@ -1,4 +1,4 @@
-# Comando nuevo-proyecto (lo importa home.nix): prepara el entorno de un
+# Comando nuevo-proyecto (lo importa modules/home): prepara el entorno de un
 # proyecto con una plantilla de templates/ en la carpeta actual.
 #
 #   cd mi-proyecto && nuevo-proyecto kotlin   (o typescript, csharp)

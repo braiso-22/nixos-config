@@ -1,5 +1,6 @@
-# Escritorio bspwm (lo importa home.nix). La sesión "bspwm" de LightDM
-# ejecuta ~/.hm-xsession, que arranca todo esto. Colores y fuentes: tema.nix.
+# Escritorio bspwm (lo importa modules/home). La sesión "bspwm" de LightDM
+# ejecuta ~/.hm-xsession, que arranca todo esto. Colores y fuentes:
+# modules/nixos/tema.nix.
 #
 # Atajos: lista `atajos` más abajo; en el escritorio, mod+I (Cmd+I) los muestra.
 
@@ -158,7 +159,7 @@ in
 {
   xsession = {
     enable = true;
-    scriptPath = ".hm-xsession"; # lo ejecuta la sesión de configuration.nix
+    scriptPath = ".hm-xsession"; # lo ejecuta la sesión de modules/nixos/escritorio.nix
     # Portapapeles compartido con el Mac y ajuste de resolución (en GNOME lo
     # arranca GNOME; en bspwm hay que hacerlo a mano).
     initExtra = "${pkgs.spice-vdagent}/bin/spice-vdagent";
@@ -301,6 +302,9 @@ in
   '';
 
   services.dunst.enable = true; # notificaciones
+
+  # Stylix solo sabe dar tema a Qt (flameshot) con qtct.
+  stylix.targets.qt.platform = "qtct";
 
   services.flameshot = {
     enable = true;

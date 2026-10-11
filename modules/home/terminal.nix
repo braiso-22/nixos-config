@@ -1,31 +1,14 @@
-# Configuración del usuario brais con Home Manager: programas de usuario y
-# sus dotfiles (~/.config/...). Se aplica con el mismo nixos-rebuild switch.
+# Terminal común a todos los usuarios (Home Manager): bash, git, gh y
+# herramientas de línea de comandos. Se aplica con el mismo nixos-rebuild switch.
 # Opciones disponibles: https://home-manager-options.extranix.com/?release=release-26.05
 
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, ... }:
 
 {
-  imports = [
-    ./vscode.nix # VS Code con perfiles por lenguaje
-    ./nuevo-proyecto.nix # comando nuevo-proyecto (plantillas de templates/)
-    ./escritorio.nix # escritorio bspwm (polybar, rofi, picom...)
-  ];
-
-  home.username = "brais";
-  home.homeDirectory = "/home/brais";
-
+  # El nombre y el correo de git van en users/<persona>/home.nix.
   programs.git = {
     enable = true;
-    settings = {
-      user.name = "brais";
-      user.email = "braisfv22@gmail.com";
-      init.defaultBranch = "main";
-    };
+    settings.init.defaultBranch = "main";
   };
 
   # GitHub CLI. gitCredentialHelper hace que git use gh para autenticarse en
@@ -49,7 +32,7 @@
   ];
   fonts.fontconfig.enable = true;
 
-  # La fuente monoespaciada de GNOME (la usa GNOME Console) la pone Stylix (tema.nix).
+  # La fuente monoespaciada de GNOME (la usa GNOME Console) la pone Stylix (modules/nixos/tema.nix).
 
   programs.bash = {
     enable = true;
@@ -129,8 +112,4 @@
     enable = true;
     settings.updates.auto_update = true;
   };
-
-  # Versión de Home Manager con la que se creó esta configuración.
-  # Igual que system.stateVersion: no se cambia nunca.
-  home.stateVersion = "26.05";
 }

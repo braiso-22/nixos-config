@@ -30,8 +30,8 @@ La primera búsqueda evalúa todo nixpkgs: tarda varios minutos y usa mucha memo
 
 ## 2. Elegir dónde añadirlo
 
-- **Programas del usuario** (herramientas de terminal, editores, apps de escritorio): en `home.nix` (Home Manager). Si Home Manager tiene módulo (`nix eval .#nixosConfigurations.nixos.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'` da `true`), usa `programs.<nombre>.enable = true;` (configura también la integración con bash, git…). Si no, añádelo a `home.packages`.
-- **Cosas del sistema** (servicios, drivers, lo que necesite root o permisos especiales): en `configuration.nix`. Si existe módulo NixOS (`nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'` da `true`), usa `programs.<nombre>.enable = true;`; si no, `environment.systemPackages`.
+- **Programas del usuario** (herramientas de terminal, editores, apps de escritorio): en Home Manager: `modules/home/` si es para todos los usuarios (las herramientas de terminal, en `terminal.nix`), `users/<persona>/home.nix` si es solo de esa persona. Si Home Manager tiene módulo (`nix eval .#nixosConfigurations.nixos.config.home-manager.users.brais.programs --apply 'p: builtins.hasAttr "<nombre>" p'` da `true`), usa `programs.<nombre>.enable = true;` (configura también la integración con bash, git…). Si no, añádelo a `home.packages`.
+- **Cosas del sistema** (servicios, drivers, lo que necesite root o permisos especiales): en `modules/nixos/` si es para todos los equipos (los programas, en `programas.nix`), `hosts/<pc>/default.nix` si es solo de esa máquina. Si existe módulo NixOS (`nix eval .#nixosConfigurations.nixos.options.programs --apply 'builtins.hasAttr "<nombre>"'` da `true`), usa `programs.<nombre>.enable = true;`; si no, `environment.systemPackages`.
 - Si dudas, pregunta al usuario explicando la diferencia en una frase.
 
 ## 3. Validar

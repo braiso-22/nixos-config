@@ -1,4 +1,4 @@
-# VS Code con un perfil por lenguaje (lo importa home.nix).
+# VS Code con un perfil por lenguaje (lo importa modules/home).
 #
 # Cada perfil tiene sus extensiones y ajustes; todos comparten las listas
 # "comunes" de abajo. VS Code recuerda qué perfil usa cada carpeta (se elige
@@ -27,7 +27,7 @@ let
   ];
 
   ajustesComunes = {
-    # Fuente, tamaño y tema de color los pone Stylix (tema.nix).
+    # Fuente, tamaño y tema de color los pone Stylix (modules/nixos/tema.nix).
     "editor.fontLigatures" = true; # => != === se ven como un símbolo
     "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
     # Guardado automático tras 1 s sin escribir. Ese guardado no formatea:
