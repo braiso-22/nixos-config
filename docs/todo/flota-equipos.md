@@ -36,15 +36,14 @@ PR; nadie puede cambiar su sistema ni instalar software por su cuenta.
 - **Escritorio:** solo bspwm en los portátiles del equipo (sin GNOME).
 - **IntelliJ fuera del repo** (ver `quitar-intellij.md`).
 - **Contenedores:** se usarán para desarrollar. Siempre **sin root**
-  (el grupo `docker` equivale a root y rompería el bloqueo). Pendiente:
-  Docker rootless o Podman rootless.
+  (el grupo `docker` equivale a root y rompería el bloqueo): **Docker
+  rootless** (ver `docker-rootless.md`).
+- **Número de portátiles:** unos 10.
 - **Actualizaciones:** por *pull* (los portátiles no siempre están encendidos
   ni localizables): `system.autoUpgrade` desde el repo, con `persistent`, más
   un "botón" (polkit) para forzarla. Más adelante, quizá comin.
 
 ## Pendiente de decidir
-- Docker rootless o Podman.
-- Número de portátiles.
 - Cifrado de disco (LUKS): muy recomendable en portátiles.
 
 ## Plan (por fases)
@@ -54,7 +53,7 @@ PR; nadie puede cambiar su sistema ni instalar software por su cuenta.
 - [ ] Lo que bspwm no trae y un portátil necesita: batería en polybar, Wi-Fi
       (nm-applet), brillo y volumen en sxhkd, suspender al cerrar la tapa,
       monitores externos (autorandr), ahorro de energía
-- [ ] Contenedores sin root
+- [x] Contenedores sin root (Docker rootless)
 - [ ] Bloqueo: usuarios sin `wheel`, sin `nix-ld`, política de VS Code
 - [ ] `system.autoUpgrade` desde el repo y botón de actualizar
 - [ ] CI que compile todos los hosts + caché binaria (Attic/Cachix)

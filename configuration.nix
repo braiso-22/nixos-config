@@ -149,6 +149,13 @@
   programs.git.enable = true; # a nivel de sistema (lo usa root); la config del usuario está en home.nix
   programs.claude-desktop.enable = true;
 
+  # Docker sin root: cada usuario tiene su propio demonio, que corre con sus
+  # permisos. No se usa el grupo "docker" (equivale a root).
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true; # DOCKER_HOST apunta al socket del usuario
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
