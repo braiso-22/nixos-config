@@ -14,6 +14,7 @@
     ./vscode.nix # VS Code con perfiles por lenguaje
     ./jetbrains.nix # IntelliJ IDEA
     ./nuevo-proyecto.nix # comando nuevo-proyecto (plantillas de templates/)
+    ./escritorio.nix # escritorio bspwm (polybar, rofi, picom...)
   ];
 
   home.username = "brais";
@@ -49,8 +50,7 @@
   ];
   fonts.fontconfig.enable = true;
 
-  # GNOME Console (kgx) usa la fuente monoespaciada del sistema.
-  dconf.settings."org/gnome/desktop/interface".monospace-font-name = "JetBrainsMono Nerd Font 11";
+  # La fuente monoespaciada de GNOME (la usa GNOME Console) la pone Stylix (tema.nix).
 
   programs.bash = {
     enable = true;

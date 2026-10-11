@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es este repo
 
-Configuración de NixOS de una única máquina: una VM QEMU **aarch64** con GNOME (hostname `nixos`, usuario `brais`). `/etc/nixos` es un enlace simbólico a este repo, así que lo que hay aquí *es* la configuración del sistema; los archivos se editan sin `sudo`.
+Configuración de NixOS de una única máquina: una VM QEMU **aarch64** (UTM en un Mac, sin aceleración gráfica) con escritorio **bspwm** (X11) y GNOME de reserva (hostname `nixos`, usuario `brais`). `/etc/nixos` es un enlace simbólico a este repo, así que lo que hay aquí *es* la configuración del sistema; los archivos se editan sin `sudo`.
 
 ## Cómo trabajar con el usuario
 
@@ -29,11 +29,12 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 
 ## Arquitectura
 
-- `flake.nix` define `nixosConfigurations.nixos` con tres inputs: `nixpkgs` (rama estable **nixos-26.05**; el usuario rechazó unstable expresamente), `claude-desktop` (flake de terceros `github:poeck/claude-desktop-nix-flake`, cuyo módulo se activa con `programs.claude-desktop.enable`); y `home-manager` (rama `release-26.05`, con `follows` al nixpkgs del sistema), cargado como módulo de NixOS. El input de claude-desktop trae su propio nixpkgs-unstable en `flake.lock` (`nixpkgs`), distinto del del sistema (`nixpkgs_2`).
+- `flake.nix` define `nixosConfigurations.nixos` con cuatro inputs: `nixpkgs` (rama estable **nixos-26.05**; el usuario rechazó unstable expresamente), `claude-desktop` (flake de terceros `github:poeck/claude-desktop-nix-flake`, cuyo módulo se activa con `programs.claude-desktop.enable`); `home-manager` (rama `release-26.05`, con `follows` al nixpkgs del sistema), cargado como módulo de NixOS; y `stylix` (rama `release-26.05`, `follows`), tema común. El input de claude-desktop trae su propio nixpkgs-unstable en `flake.lock` (`nixpkgs`), distinto del del sistema (`nixpkgs_2`).
 - No hay `system =` en `nixosSystem`: la arquitectura sale de `nixpkgs.hostPlatform` en `hardware-configuration.nix`.
 - `configuration.nix`: lo del **sistema** (arranque, servicios, escritorio, usuarios).
+- `tema.nix` (módulo NixOS): Stylix con Catppuccin Mocha, fuentes, cursor y fondo; se aplica también en Home Manager. Objetivos `gnome`, `gtksourceview` y `nixos-icons` desactivados: recompilan GNOME sin caché (~1 GiB y mucha compilación).
 - `home.nix`: lo del **usuario** con Home Manager (herramientas de terminal, IDEs, dotfiles). Se aplica con el mismo `nixos-rebuild switch`. Las herramientas del usuario van aquí.
-  - Importa módulos propios: `vscode.nix` (VS Code con un perfil por lenguaje: default, typescript, csharp), `jetbrains.nix` (IntelliJ IDEA de nixpkgs) y `nuevo-proyecto.nix` (comando del mismo nombre).
+  - Importa módulos propios: `vscode.nix` (VS Code con un perfil por lenguaje: default, typescript, csharp), `jetbrains.nix` (IntelliJ IDEA de nixpkgs), `nuevo-proyecto.nix` (comando del mismo nombre) y `escritorio.nix` (bspwm, sxhkd, polybar, rofi, picom, dunst, alacritty, flameshot, bloqueo). Los atajos están en la lista `atajos` de `escritorio.nix`, de la que salen sxhkd y la chuleta (Cmd+I).
 - `templates/<lenguaje>/` (kotlin, typescript, csharp): plantillas de entorno por proyecto (`devShell` + `.envrc` para direnv), expuestas como salida `templates` de `flake.nix`. **No cambian el sistema** (no hace falta `switch` para editarlas). Se usan con `nuevo-proyecto <lenguaje>`, que fija el nixpkgs de cada proyecto a la revisión del sistema para reutilizar lo instalado. Los lenguajes (JDK, Node, .NET) no se instalan en el sistema.
 - En ambos, si un programa tiene módulo `programs.<nombre>`, se prefiere a añadir el paquete suelto (`home.packages` o `environment.systemPackages`): el módulo configura también la integración (bash, git…).
 - Los `.nix` siguen el estilo de **nixfmt**: después de editar uno, pásale `nixfmt` (VS Code lo hace al guardar con Ctrl+S). Excepto `hardware-configuration.nix`.
@@ -42,6 +43,7 @@ nixfmt <archivo>.nix                                # formatear (estilo oficial 
 
 ## Trampas
 
+- **Escritorio**: la sesión `bspwm` de LightDM ejecuta `~/.hm-xsession`; los servicios solo de bspwm (picom, flameshot, bloqueo) se atan a `hm-graphical-session.target`, no a `graphical-session.target` (si no, arrancan también en GNOME). Cambiar LightDM con `switch` no cierra la sesión (`display-manager` tiene `restartIfChanged = false`); se nota al volver a entrar. En comandos de sxhkd las llaves `{}` son sintaxis propia: si un comando las necesita, va en un `writeShellScript`. Los paquetes pueden traer autoarranques XDG (`etc/xdg/autostart`) que Home Manager ejecuta en la sesión: ocultarlos con `xdg.configFile."autostart/X.desktop"` y `Hidden=true`. En el Mac, macOS se queda Cmd+Q/H/W/M/Tab/Espacio si UTM no captura el teclado.
 - Con flakes, Nix **solo ve archivos añadidos a git**: un archivo nuevo necesita `git add` antes de `dry-build`/`switch`, o dará "does not exist".
 - **Disco justo (48 GB, ampliado desde 41; el Mac no tiene más espacio)**: hay limpieza automática semanal (`nix.gc`, generaciones de más de 14 días, y `nix.optimise`), pero compilar paquetes no libres grandes (IntelliJ) llega a ~19 GB de pico. Si el `switch` falla con "No space left on device": borrar generaciones viejas (`sudo nix-env --delete-generations +3 --profile /nix/var/nix/profiles/system`) y `sudo nix-collect-garbage`. `dry-build` no cuenta lo que se descarga de fuera de la caché (VS Code, IntelliJ, extensiones): estímalo aparte.
 - Archivos creados por el usuario con `sudo` quedan como `root` y no podrás editarlos; pídele `sudo chown brais:users <archivo>`.

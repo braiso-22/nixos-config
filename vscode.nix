@@ -27,9 +27,8 @@ let
   ];
 
   ajustesComunes = {
-    "editor.fontFamily" = "'JetBrainsMono Nerd Font', monospace";
+    # Fuente, tamaño y tema de color los pone Stylix (tema.nix).
     "editor.fontLigatures" = true; # => != === se ven como un símbolo
-    "editor.fontSize" = 14;
     "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
     # Guardado automático tras 1 s sin escribir. Ese guardado no formatea:
     # formatOnSave solo actúa al guardar a mano (Ctrl+S).
@@ -59,6 +58,13 @@ let
     };
 in
 {
+  # Stylix aplica su tema (colores y fuente) a estos perfiles.
+  stylix.targets.vscode.profileNames = [
+    "default"
+    "typescript"
+    "csharp"
+  ];
+
   programs.vscode = {
     enable = true;
     profiles = {

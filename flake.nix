@@ -9,6 +9,11 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Stylix: un tema de colores y fuentes para todo (tema.nix).
+    stylix = {
+      url = "github:nix-community/stylix/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -16,6 +21,7 @@
       nixpkgs,
       claude-desktop,
       home-manager,
+      stylix,
       ...
     }:
     {
@@ -23,6 +29,8 @@
         modules = [
           ./configuration.nix
           claude-desktop.nixosModules.default
+          stylix.nixosModules.stylix # también aplica el tema en Home Manager
+          ./tema.nix
           home-manager.nixosModules.home-manager
           {
             home-manager = {

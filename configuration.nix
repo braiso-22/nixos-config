@@ -48,9 +48,26 @@
     LC_TIME = "es_ES.UTF-8";
   };
 
-  # Enable the GNOME Desktop Environment.
-  services.displayManager.gdm.enable = true;
+  # GNOME (Wayland) se mantiene como sesión alternativa a bspwm.
   services.desktopManager.gnome.enable = true;
+
+  # Escritorio bspwm (X11). Se elige la sesión en LightDM: bspwm o GNOME.
+  services.xserver.enable = true;
+  services.xserver.displayManager.lightdm.enable = true;
+  services.displayManager.defaultSession = "bspwm"; # GNOME se elige en el icono de sesiones
+  # La sesión ejecuta el script de Home Manager (escritorio.nix), que arranca
+  # bspwm y los servicios solo de bspwm (polybar, picom...).
+  services.xserver.displayManager.session = [
+    {
+      manage = "desktop";
+      name = "bspwm";
+      start = "exec $HOME/.hm-xsession";
+    }
+  ];
+  # Desbloquear el llavero de GNOME al iniciar sesión (ahí guarda gh su token).
+  security.pam.services.lightdm.enableGnomeKeyring = true;
+  # Bloqueo de pantalla de bspwm (Super+Shift+X); el módulo le da acceso a PAM.
+  programs.i3lock.enable = true;
 
   # Configure keymap in X11
   # Sin variante "nodeadkeys": así ´ + a = á (teclas muertas activadas)
@@ -96,8 +113,11 @@
     }
   ];
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
+  # Scroll natural en X11 (bspwm); el de GNOME va por dconf, arriba.
+  services.libinput = {
+    mouse.naturalScrolling = true;
+    touchpad.naturalScrolling = true;
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."brais" = {
