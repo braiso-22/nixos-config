@@ -132,8 +132,20 @@
     ];
   };
 
-  # Install firefox.
-  programs.firefox.enable = true;
+  programs.firefox = {
+    enable = true;
+    # La app de Claude define LD_LIBRARY_PATH con sus librerías y todo lo que
+    # abre lo hereda (enlaces del chat y de su terminal). Con una nss antigua
+    # ahí, Firefox se cierra sin avisar. Su lanzador la vacía antes de poner
+    # las suyas (normalmente ya está vacía, así que no cambia nada más).
+    package = pkgs.firefox.overrideAttrs (old: {
+      makeWrapperArgs = [
+        "--unset"
+        "LD_LIBRARY_PATH"
+      ]
+      ++ old.makeWrapperArgs;
+    });
+  };
   programs.git.enable = true; # a nivel de sistema (lo usa root); la config del usuario está en home.nix
   programs.claude-desktop.enable = true;
 
