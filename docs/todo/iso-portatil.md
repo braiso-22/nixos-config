@@ -54,7 +54,7 @@ direcciones PCI de las dos gráficas, que solo se ven en el propio portátil.
 - [x] Salida `packages.x86_64-linux.iso-portatil` en `flake.nix`
 - [x] Evaluar desde la VM y ver qué habría que construir
 - [x] `.github/workflows/iso-portatil.yml`
-- [ ] Commit, push y lanzar el flujo
+- [x] Commit, push y lanzar el flujo
 - [ ] Descargar, grabar en USB (balenaEtcher) y arrancar el portátil
 - [ ] `info-portatil` y pasarme el informe
 
@@ -66,3 +66,8 @@ trae y no se usa). Queda el aviso de `xdg.portal` (fase 3).
 `nix build --dry-run` en x86_64: 3,4 GiB de descarga (8,8 GiB descomprimido)
 y 532 derivaciones que construir, todas ligeras (configuración, firmware,
 reempaquetados de VS Code, Claude y Firefox). La VM no cambia.
+
+Primera ISO (commit 915dea9): construida en GitHub en **7 min 36 s**, ISO de
+**3,8 GiB** (`nixos-26.05.20261006.b253099-x86_64-linux.iso`), artifact
+`iso-portatil` hasta el 2026-10-18. GitHub avisó de que `actions/checkout@v4`
+y `actions/upload-artifact@v4` usan Node.js 20 (obsoleto): subidas a `@v7`.

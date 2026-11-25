@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # La máquina trae ~14 GB libres; la ISO necesita bastante más (paquetes
       # descargados + la imagen). Se borran herramientas que no usamos.
@@ -30,7 +30,7 @@ jobs:
           cp -L result/iso/*.iso iso/
           ls -lh iso/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: iso-portatil
           path: iso/*.iso
