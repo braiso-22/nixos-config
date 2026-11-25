@@ -54,3 +54,5 @@ Preparado para varios equipos (fase 1 de `docs/todo/flota-equipos.md`): lo comú
 - **Disco justo (48 GB, ampliado desde 41; el Mac no tiene más espacio)**: hay limpieza automática semanal (`nix.gc`, generaciones de más de 14 días, y `nix.optimise`), pero compilar paquetes no libres grandes llega a ~19 GB de pico (pasó con IntelliJ, ya quitado). Si el `switch` falla con "No space left on device": borrar generaciones viejas (`sudo nix-env --delete-generations +3 --profile /nix/var/nix/profiles/system`) y `sudo nix-collect-garbage`. `dry-build` no cuenta lo que se descarga de fuera de la caché (VS Code, extensiones): estímalo aparte.
 - Archivos creados por el usuario con `sudo` quedan como `root` y no podrás editarlos; pídele `sudo chown brais:users <archivo>`.
 - Copia de seguridad de la `/etc/nixos` original (pre-flake, con channels) en `/etc/nixos.bak`.
+- Cambios de teclado (xkb) y scroll (dconf) no se notan hasta **reiniciar la VM**: decírselo al usuario antes de ponerse a diagnosticar.
+- Recrear la VM desde cero (UTM, instalador, primer `switch`): `docs/reinstalar-vm.md`.

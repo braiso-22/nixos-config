@@ -22,6 +22,9 @@ docs/
 
 Las ideas sueltas que aún no son una tarea van en `todo/ideas.md`.
 
+Las guías que no son tareas (cómo hacer algo cuando haga falta) van sueltas en
+`docs/`, p. ej. `reinstalar-vm.md`.
+
 ## Plantilla
 
 ```markdown
